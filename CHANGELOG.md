@@ -2,9 +2,23 @@
 
 ## 0.9.0
 
-One version across the suite for the Forever beta. Every addon carried a
-number of its own that said nothing about how finished it was, so they are
-aligned here and the suite goes to 1.0.0 together at launch.
+The warlock kit's first release for the WoW Forever beta. It carries the
+suite's single version number, so the suite goes to 1.0.0 together at
+launch.
+
+- Soul bar: Healthstone and Soulstone, one button each that uses the stone
+  if you carry one and makes one if you do not, with Ritual of Summoning,
+  Ritual of Souls and Eye of Kilrogg as you learn them.
+- Pet bar: a summon button for each demon you know, the one that is out lit
+  up, with Soul Link and Sacrifice once talented.
+- Shard counter: your soul shards at a glance.
+- Cooldown bar: a row of icons for the spells you name, off until you turn
+  it on under Options or with /wdt cd.
+- Talents, a pre-pull checklist and racials in the kit window (/wdt kit).
+- A locked bar moves while you hold Shift, so a lock only stops an
+  accidental nudge.
+- The bars take the look and theme you pick in WickCore.
+- Without WickCore it says so once, with a link to get it.
 
 ## 1.0.0 - 2026-09-17 (Forever)
 

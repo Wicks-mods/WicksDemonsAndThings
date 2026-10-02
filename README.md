@@ -11,12 +11,15 @@ player's own cooldowns, buffs, health and power are secret, and aura queries
 throw. So this is a loadout kit, not a combat tracker: everything a warlock
 sets up before the pull, all of it readable out of combat.
 
-- **Soul bar.** Healthstone, Soulstone, Firestone, Spellstone and the create
-  spells behind them. Each button uses the stone if you have one, or casts the
-  create spell if you do not.
-- **Pet bar.** Every demon you know as a secure summon button, Incubus and
-  Succubus as separate summons, the active demon highlighted.
+- **Soul bar.** Healthstone and Soulstone, one button each: it uses the stone
+  if you carry one and makes one if you do not. Ritual of Summoning, Ritual of
+  Souls and Eye of Kilrogg join it as you learn them.
+- **Pet bar.** A summon button for each demon you know (Imp, Voidwalker,
+  Succubus, Felhunter, Felguard), the one that is out lit up. Soul Link and
+  Sacrifice too, once talented.
 - **Shard counter.** Bag count, falling back to the soul shard resource.
+- **Cooldown bar.** A row of icons for the spells you name. Off until you turn
+  it on under Options or with `/wdt cd`.
 - **Talents.** Export the active build as a Blizzard import string, import a
   string as a new loadout, save builds to an account-wide library, apply one
   with a click. Blizzard's own parser does the work.
@@ -36,7 +39,8 @@ folders into the Forever client's `Interface\AddOns\`.
 | `/wdt` | Options panel |
 | `/wdt kit` | Talents, checklist, racials |
 | `/wdt soul` / `pet` / `shard` | Toggle a bar |
-| `/wdt lock` / `unlock` | Lock or unlock all bars |
+| `/wdt cd` | The cooldown bar |
+| `/wdt lock` / `unlock` | Lock or unlock all bars (hold Shift to move a locked one) |
 | `/wdt reset` | Reset bar positions |
 | `/wdt status` | Diagnostics |
 
