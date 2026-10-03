@@ -2,7 +2,7 @@
 ## Title: Wick's Demons and Things
 ## Notes: Soul bar, pet bar, cooldown / proc tracker, and shard counter for TBC warlocks.
 ## Author: Wick
-## Version: 0.1.1
+## Version: 0.2.0
 ## SavedVariables: WicksDemonsDB
 ## SavedVariablesPerCharacter: WicksDemonsCharDB
 ## OptionalDeps: WickCore
