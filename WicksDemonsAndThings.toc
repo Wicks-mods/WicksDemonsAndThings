@@ -1,0 +1,16 @@
+## Interface: 20505, 20506
+## Title: Wick's Demons and Things
+## Notes: Soul bar, pet bar, cooldown / proc tracker, and shard counter for TBC warlocks.
+## Author: Wick
+## Version: 0.1.1
+## SavedVariables: WicksDemonsDB
+## SavedVariablesPerCharacter: WicksDemonsCharDB
+## OptionalDeps: WickCore
+
+# Core
+Core.lua
+SoulBar.lua
+PetBar.lua
+Cooldowns.lua
+ShardCounter.lua
+UI.lua

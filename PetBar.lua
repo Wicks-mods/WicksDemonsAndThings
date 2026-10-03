@@ -1,0 +1,327 @@
+-- Wick's Demons and Things
+-- PetBar.lua: secure-action strip for pet summons + Demonology pet utility.
+--   * Summon Imp / Voidwalker / Succubus / Felhunter — always shown if known.
+--   * Summon Felguard / Soul Link / Sacrifice — Demonology-talented; filtered.
+--   * Active-pet glow: highlights the summon button matching the current pet
+--     (matched via UnitCreatureFamily("pet")).
+
+local ADDON, ns = ...
+if not WickCore then return end   -- said once in Core.lua
+local WD = WicksDemons
+
+WD.PetBar = {}
+local PB = WD.PetBar
+
+-- Palette and chrome from WickCore through Core.lua's adapter, so the
+-- bar follows the suite's look and theme.
+local C_BG, C_BORDER, C_GREEN, C_TEXT_NORMAL, C_TEXT_DIM = WD.C.BG, WD.C.BORDER, WD.C.GREEN, WD.C.TEXT, WD.C.DIM
+local Ink, Paint = WD.Ink, WD.Paint
+
+local ICON_SIZE = 32
+local ICON_GAP  = 3
+local PADDING   = 5
+
+-- ============================================================
+-- Tracked pet actions
+-- ============================================================
+-- `family` = matched against UnitCreatureFamily("pet") for active-pet glow.
+local PETS = {
+    { spell = "Summon Imp",         short = "Imp",  family = "Imp",
+      label = "Summon Imp" },
+    { spell = "Summon Voidwalker",  short = "VW",   family = "Voidwalker",
+      label = "Summon Voidwalker" },
+    { spell = "Summon Succubus",    short = "Suc",  family = "Succubus",
+      label = "Summon Succubus" },
+    { spell = "Summon Felhunter",   short = "FH",   family = "Felhunter",
+      label = "Summon Felhunter" },
+    { spell = "Summon Felguard",    short = "FG",   family = "Felguard",
+      label = "Summon Felguard" },
+    { spell = "Soul Link",          short = "SL",   aura = "Soul Link",
+      label = "Soul Link (toggle)" },
+    { spell = "Sacrifice",          short = "Sac",
+      label = "Sacrifice (consume pet for shield)" },
+}
+
+-- ============================================================
+-- Brand chrome helpers
+-- ============================================================
+local NewTexture, AddBorder, AddCornerAccents = WD.NewTexture, WD.AddBorder, WD.AddCornerAccents
+
+local function spellKnown(name)
+    if not name or name == "" then return false end
+    if not GetSpellInfo or not GetSpellInfo(name) then return false end
+    local start = GetSpellCooldown(name)
+    return start ~= nil
+end
+
+local function findAura(unit, name)
+    if not unit or unit == "" then return nil end
+    if unit ~= "player" and not UnitExists(unit) then return nil end
+    for i = 1, 40 do
+        -- TBC 2.5.5: count is at position 3 (rank was removed).
+        local n, _, count, _, duration, expirationTime = UnitBuff(unit, i)
+        if not n then return nil end
+        if n == name then return n, count or 0, expirationTime or 0, duration or 0 end
+    end
+    return nil
+end
+
+-- ============================================================
+-- Bar construction
+-- ============================================================
+local function buildHost(count)
+    local cfg = WicksDemonsDB.pet
+    local barW = PADDING * 2 + math.max(1, count) * ICON_SIZE + math.max(0, count - 1) * ICON_GAP
+    local barH = PADDING * 2 + ICON_SIZE
+
+    local host = CreateFrame("Frame", "WicksDemonsPetBar", UIParent)
+    host:SetFrameStrata("MEDIUM")
+    host:SetFrameLevel(10)
+    host:SetSize(barW, barH)
+    host:ClearAllPoints()
+    host:SetPoint(cfg.point, UIParent, cfg.point, cfg.x, cfg.y)
+    host:SetMovable(true)
+    host:EnableMouse(true)
+    host:SetClampedToScreen(true)
+    host:RegisterForDrag("LeftButton")
+    host:SetScript("OnDragStart", function(self)
+        if cfg.locked or WicksDemons:Claimed(self) then return end
+        self:StartMoving()
+    end)
+    host:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        local p, _, _, x, y = self:GetPoint()
+        cfg.point, cfg.x, cfg.y = p, x, y
+    end)
+
+    WicksDemons:Movable(host, "demons_pets", "Demons: pet bar", cfg)
+    NewTexture(host, "BACKGROUND", C_BG):SetAllPoints(host)
+    AddBorder(host)
+    AddCornerAccents(host)
+
+    return host, cfg
+end
+
+-- Forward drags from a child button to the host frame, so the user can
+-- grab the bar from anywhere (not only the 5px padding edge). Secure
+-- buttons consume mouse-up via RegisterForClicks, which would otherwise
+-- swallow the host's OnDragStop and leave the bar stuck to the cursor.
+local function attachDragForward(button, host, cfg)
+    button:RegisterForDrag("LeftButton")
+    button:SetScript("OnDragStart", function()
+        if cfg.locked or WicksDemons:Claimed(host) then return end
+        host:StartMoving()
+    end)
+    button:SetScript("OnDragStop", function()
+        host:StopMovingOrSizing()
+        local p, _, _, x, y = host:GetPoint()
+        cfg.point, cfg.x, cfg.y = p, x, y
+    end)
+end
+
+local function buildButton(host, entry, index, cfg)
+    local b = CreateFrame("Button", nil, host, "SecureActionButtonTemplate")
+    b:RegisterForClicks("AnyUp", "AnyDown")
+    b:SetSize(ICON_SIZE, ICON_SIZE)
+    b:SetPoint("TOPLEFT", host, "TOPLEFT",
+        PADDING + (index - 1) * (ICON_SIZE + ICON_GAP), -PADDING)
+    attachDragForward(b, host, cfg)
+    b:SetAttribute("type", "spell")
+    b:SetAttribute("spell", entry.spell)
+
+    local icon = b:CreateTexture(nil, "ARTWORK")
+    icon:SetPoint("TOPLEFT", 1, -1)
+    icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    local tex = GetSpellTexture and GetSpellTexture(entry.spell)
+    if tex then icon:SetTexture(tex) else icon:SetColorTexture(0.1, 0.1, 0.15, 1) end
+    b._icon = icon
+
+    -- 1px frame
+    local function edge(p1, p2, w, h)
+        local t = b:CreateTexture(nil, "OVERLAY")
+        t:SetColorTexture(0, 0, 0, 0.85)
+        t:SetPoint(p1); t:SetPoint(p2)
+        if w then t:SetWidth(w) end
+        if h then t:SetHeight(h) end
+    end
+    edge("TOPLEFT", "TOPRIGHT", nil, 1)
+    edge("BOTTOMLEFT", "BOTTOMRIGHT", nil, 1)
+    edge("TOPLEFT", "BOTTOMLEFT", 1, nil)
+    edge("TOPRIGHT", "BOTTOMRIGHT", 1, nil)
+
+    -- Cooldown spiral (Fel Domination, etc.)
+    local cd = CreateFrame("Cooldown", nil, b, "CooldownFrameTemplate")
+    cd:SetAllPoints(b)
+    cd:SetDrawEdge(false)
+    cd:SetSwipeColor(0, 0, 0, 0.7)
+    b._cd = cd
+
+    -- Active-pet / active-aura glow
+    local glow = b:CreateTexture(nil, "OVERLAY")
+    Paint(glow, C_GREEN, 0.45)
+    glow:SetAllPoints(b)
+    glow:Hide()
+    b._glow = glow
+
+    -- Tooltip
+    b:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine(entry.label or entry.spell,
+            C_TEXT_NORMAL[1], C_TEXT_NORMAL[2], C_TEXT_NORMAL[3])
+        if entry.family then
+            GameTooltip:AddLine("Pet summon", C_TEXT_DIM[1], C_TEXT_DIM[2], C_TEXT_DIM[3])
+        end
+        GameTooltip:Show()
+    end)
+    b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+    return b
+end
+
+-- ============================================================
+-- Refresh
+-- ============================================================
+function PB:Refresh()
+    if not self.icons then return end
+    -- Skip the per-entry pet-family + aura + CD scan when the bar isn't on screen.
+    if not self.host or not self.host:IsShown() then return end
+    local petFamily = UnitExists("pet") and UnitCreatureFamily and UnitCreatureFamily("pet") or nil
+
+    for _, e in ipairs(self.entries) do
+        local b = self.icons[e]
+        if b then
+            local now = GetTime()
+            local active = false
+
+            if e.family and petFamily == e.family then
+                active = true
+            elseif e.aura and findAura("player", e.aura) then
+                active = true
+            end
+
+            -- Cooldown
+            local start, dur = GetSpellCooldown(e.spell)
+            if start and start > 0 and dur and dur > 1.5 then
+                b._cd:SetCooldown(start, dur); b._cd:Show()
+                if b._icon.SetDesaturated then b._icon:SetDesaturated(false) end
+                b._icon:SetVertexColor(0.45, 0.45, 0.45)
+                b._glow:Hide()
+            else
+                b._cd:Hide()
+                if active then
+                    b._glow:Show()
+                    if b._icon.SetDesaturated then b._icon:SetDesaturated(false) end
+                    b._icon:SetVertexColor(1, 1, 1)
+                else
+                    b._glow:Hide()
+                    if b._icon.SetDesaturated then b._icon:SetDesaturated(false) end
+                    b._icon:SetVertexColor(1, 1, 1)
+                end
+            end
+        end
+    end
+end
+
+-- ============================================================
+-- Init / lifecycle
+-- ============================================================
+function PB:Init()
+    if self.initialized then return end
+    if not WD.isWarlock then return end
+    self.initialized = true
+
+    -- Filter to known spells (talent-gated entries auto-disappear).
+    local visible = {}
+    for _, e in ipairs(PETS) do
+        if spellKnown(e.spell) then table.insert(visible, e) end
+    end
+    self.entries = visible
+
+    if #visible == 0 then return end
+
+    local host, cfg = buildHost(#visible)
+    self.host = host
+    self.cfg  = cfg
+
+    self.icons = {}
+    for i, e in ipairs(visible) do
+        self.icons[e] = buildButton(host, e, i, cfg)
+    end
+
+    if cfg.hidden then host:Hide() else host:Show() end
+
+    if not self.poll then
+        local f = CreateFrame("Frame")
+        self.poll = f
+        local accum = 0
+        f:SetScript("OnUpdate", function(_, elapsed)
+            accum = accum + elapsed
+            if accum < 0.25 then return end
+            accum = 0
+            PB:Refresh()
+        end)
+    end
+
+    self:Refresh()
+end
+
+function PB:Rebuild()
+    if InCombatLockdown() then
+        self._rebuildPending = true
+        return
+    end
+    if not self.host then return self:Init() end
+
+    if self.icons then
+        for _, b in pairs(self.icons) do
+            b:Hide(); b:ClearAllPoints(); b:SetParent(nil)
+        end
+    end
+    self.icons = {}
+
+    local visible = {}
+    for _, e in ipairs(PETS) do
+        if spellKnown(e.spell) then table.insert(visible, e) end
+    end
+    self.entries = visible
+
+    local count = #visible
+    local barW = PADDING * 2 + math.max(1, count) * ICON_SIZE + math.max(0, count - 1) * ICON_GAP
+    self.host:SetWidth(barW)
+
+    for i, e in ipairs(visible) do
+        self.icons[e] = buildButton(self.host, e, i, self.cfg)
+    end
+
+    if not (self.cfg and self.cfg.hidden) then self.host:Show() end
+    self:Refresh()
+end
+
+WD:On("COMBAT_END", function()
+    if WD.PetBar and WD.PetBar._rebuildPending then
+        WD.PetBar._rebuildPending = false
+        WD.PetBar:Rebuild()
+    end
+end)
+
+WD:On("UNIT_PET",              function() if PB.Refresh then PB:Refresh() end end)
+WD:On("PLAYER_TALENT_UPDATE",  function() if PB.Rebuild then PB:Rebuild() end end)
+WD:On("CHARACTER_POINTS_CHANGED", function() if PB.Rebuild then PB:Rebuild() end end)
+WD:On("SPELLS_CHANGED",        function() if PB.Rebuild then PB:Rebuild() end end)
+WD:On("LOGIN",                 function() PB:Init() end)
+
+function PB:Show()  if self.host then self.host:Show(); self.cfg.hidden = false; self:Refresh() end end
+function PB:Hide()  if self.host then self.host:Hide(); self.cfg.hidden = true  end end
+function PB:Toggle() if self.host then if self.host:IsShown() then self:Hide() else self:Show() end end end
+function PB:ResetPosition()
+    if not self.cfg or not self.host then return end
+    if WicksDemons:Claimed(self.host) then WicksDemons:MovedByUI(); return end
+    self.cfg.point = "CENTER"
+    self.cfg.x = 180; self.cfg.y = 200
+    self.host:ClearAllPoints()
+    self.host:SetPoint("CENTER", UIParent, "CENTER", 180, 200)
+    self.host:Show()
+    self.cfg.hidden = false
+end
