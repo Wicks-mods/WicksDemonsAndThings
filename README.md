@@ -13,7 +13,7 @@ This is the TBC build, on the `tbc` branch. The Forever build lives on `main`.
   Ritual of Summoning, Ritual of Souls and Eye of Kilrogg join it as you
   learn them.
 - **Pet bar.** A summon button for each demon you know: Imp, Voidwalker,
-  Succubus, Felhunter, and Felguard once talented. Soul Link and Demonic
+  Succubus, Felhunter, and Felguard once talented. Soul Link and
   Sacrifice too. The demon that is out is lit up.
 - **Cooldown bar.** Banish, Curse of Doom, Death Coil, Howl of Terror, Fel
   Domination, Conflagrate, Shadowfury and Soulshatter, each shown only if you
