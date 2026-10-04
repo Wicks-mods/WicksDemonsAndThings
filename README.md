@@ -2,7 +2,7 @@
 
 > Warlock bars for World of Warcraft: TBC Classic Anniversary. Stones and rituals, demons, cooldowns and procs, and your shard count.
 
-Part of the **[Wick suite](https://github.com/Wicksmods/WickSuite)**: precision addons built around a single fel-green-on-deep-purple aesthetic. Built on [WickCore](https://github.com/Wicksmods/WickCore).
+Part of the **[Wick suite](https://github.com/Wicks-mods/WickSuite)**: precision addons built around a single fel-green-on-deep-purple aesthetic. Built on [WickCore](https://github.com/Wicks-mods/WickCore).
 
 This is the TBC build, on the `tbc` branch. The Forever build lives on `main`.
 
@@ -26,7 +26,7 @@ game's Options. With Wick's UI loaded, move them with `/wui move`.
 
 ## Install
 
-Requires **[WickCore](https://github.com/Wicksmods/WickCore)**. Extract both
+Requires **[WickCore](https://github.com/Wicks-mods/WickCore)**. Extract both
 folders into `World of Warcraft\_anniversary_\Interface\AddOns\`.
 
 ## Usage
