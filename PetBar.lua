@@ -291,7 +291,6 @@ end
 function PB:Init()
     if self.initialized then return end
     if not WD.isWarlock then return end
-    self.initialized = true
 
     -- Filter to known spells (talent-gated entries auto-disappear).
     local visible = {}
@@ -300,7 +299,10 @@ function PB:Init()
     end
     self.entries = visible
 
+    -- Nothing known yet: not built, and tried again at every spellbook
+    -- change (see the soul bar).
     if #visible == 0 then return end
+    self.initialized = true
 
     local host, cfg = buildHost(#visible)
     self.host = host
@@ -373,9 +375,16 @@ WD:On("CHARACTER_POINTS_CHANGED", function() if PB.Rebuild then PB:Rebuild() end
 WD:On("SPELLS_CHANGED",        function() if PB.Rebuild then PB:Rebuild() end end)
 WD:On("LOGIN",                 function() PB:Init() end)
 
-function PB:Show()  if self.host then self.host:Show(); self.cfg.hidden = false; self:Refresh() end end
+function PB:Show()
+    if not self.host then self:Init() end
+    if not self.host then
+        if WD.A then WD.A:Print("the pet bar has nothing to show yet. It fills as you learn your summons.") end
+        return
+    end
+    self.host:Show(); self.cfg.hidden = false; self:Refresh()
+end
 function PB:Hide()  if self.host then self.host:Hide(); self.cfg.hidden = true  end end
-function PB:Toggle() if self.host then if self.host:IsShown() then self:Hide() else self:Show() end end end
+function PB:Toggle() if self.host and self.host:IsShown() then self:Hide() else self:Show() end end
 function PB:ResetPosition()
     if not self.cfg or not self.host then return end
     self.cfg.point = "CENTER"
