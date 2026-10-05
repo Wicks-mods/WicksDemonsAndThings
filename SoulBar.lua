@@ -345,7 +345,6 @@ function SB:MarkBagDirty() bagDirty = true end
 function SB:Init()
     if self.initialized then return end
     if not WD.isWarlock then return end
-    self.initialized = true
 
     -- Filter: spells need to be known; items always shown.
     local visible = {}
@@ -359,9 +358,13 @@ function SB:Init()
     end
     self.entries = visible
 
+    -- Nothing known yet: a new warlock, or a spellbook that was not in at
+    -- login. Not built, and tried again at every spellbook change. It used
+    -- to count as built, so a bar empty at login never came.
     if #visible == 0 then
         return
     end
+    self.initialized = true
 
     local host, cfg = buildHost(#visible)
     self.host = host
@@ -450,14 +453,18 @@ WD:On("SPELLS_CHANGED", function() if SB.Rebuild then SB:Rebuild() end end)
 WD:On("LOGIN",          function() SB:Init() end)
 
 function SB:Show()
-    if not self.host then return end
+    if not self.host then self:Init() end
+    if not self.host then
+        if WD.A then WD.A:Print("the soul bar has nothing to show yet. It fills as you learn Create Healthstone, Create Soulstone and the rituals.") end
+        return
+    end
     self.host:Show()
     self.cfg.hidden = false
     bagDirty = true   -- force a fresh bag scan on first refresh after show
     self:Refresh()
 end
 function SB:Hide()  if self.host then self.host:Hide(); self.cfg.hidden = true  end end
-function SB:Toggle() if self.host then if self.host:IsShown() then self:Hide() else self:Show() end end end
+function SB:Toggle() if self.host and self.host:IsShown() then self:Hide() else self:Show() end end
 function SB:ResetPosition()
     if not self.cfg or not self.host then return end
     if WicksDemons:Claimed(self.host) then WicksDemons:MovedByUI(); return end

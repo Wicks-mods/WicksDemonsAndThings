@@ -318,6 +318,7 @@ function A:OnEnable()
             y = O:Check(body, label,
                 function() return not (WicksDemonsDB[key] and WicksDemonsDB[key].hidden) end,
                 function(v)
+                    if WicksDemonsDB[key] then WicksDemonsDB[key].hidden = not v end
                     local mod = WD[modName]
                     if v then if mod and mod.Show then mod:Show() end
                     else if mod and mod.Hide then mod:Hide() end end

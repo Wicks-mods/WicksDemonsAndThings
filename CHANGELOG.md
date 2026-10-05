@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- A warlock who knew none of the soul bar's or pet bar's spells at login
+  never got those bars, even after learning the spells. They are built
+  now as soon as a spell is known. Showing an empty bar says it has
+  nothing yet, and the panel keeps your choice either way.
+
 ## 0.2.0 - 2026-10-03
 
 ### Fixed

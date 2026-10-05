@@ -191,6 +191,7 @@ function UI:Build()
         local row = NewCheckbox(body, label,
             function() return not WicksDemonsDB[key].hidden end,
             function(v)
+                if WicksDemonsDB[key] then WicksDemonsDB[key].hidden = not v end
                 local mod = ({ soul = WD.SoulBar, pet = WD.PetBar, cd = WD.Cooldowns, shard = WD.ShardCounter })[key]
                 if v then if mod and mod.Show then mod:Show() end
                 else      if mod and mod.Hide then mod:Hide() end end
