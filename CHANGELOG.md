@@ -1,5 +1,9 @@
 # Wick's Demons and Things - Changelog
 
+## Unreleased
+
+- Shows in the game's addon list with an icon and the two-tone Wick title, under a Wick's Mods heading.
+
 ## 0.9.0
 
 The warlock kit's first release for the WoW Forever beta. It carries the

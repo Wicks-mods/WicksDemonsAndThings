@@ -1,11 +1,15 @@
 ## Interface: 16001
-## Title: Wick's Demons and Things
+## Title: |cffD4C8A1Wick's|r |cff4FC778Demons and Things|r
 ## Notes: Warlock loadout kit for World of Warcraft: Forever. Soul bar, pet bar, shard counter, talents, pre-pull checklist, racials.
 ## Author: Wick
 ## Version: 0.9.0
 ## OptionalDeps: WickCore
 ## SavedVariables: WicksDemonsSaved
+## IconTexture: Interface\Icons\Spell_Shadow_SummonImp
+## Category: Wick's Mods
 ## X-Website: https://wicksmods.com
+## X-License: MIT with trademark carve-out
+## X-Curse-Project-ID: 1724608
 ## X-WickCore: WickCore-1.0
 
 Core.lua
