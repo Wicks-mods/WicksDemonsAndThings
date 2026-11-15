@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: settings saved by an older version could lack a section and raise an error at login. Missing sections are filled in.
+- Shows in the game's addon list with an icon and the two-tone Wick title, under a Wick's Mods heading.
+
 ## 0.2.1 (2026-11-05)
 
 ### Fixed
@@ -9,7 +14,7 @@
   now as soon as a spell is known. Showing an empty bar says it has
   nothing yet, and the panel keeps your choice either way.
 
-## 0.2.0 - 2026-10-03
+## 0.2.0 (2026-10-03)
 
 ### Fixed
 
@@ -31,7 +36,7 @@
   as the rest of the suite. Without it the addon says so once at login and
   does nothing else. Your settings are untouched.
 
-## v0.1.1 - 2026-05-07
+## 0.1.1 (2026-05-07)
 
 Performance pass plus a TBC 2.5.5 API namespace fix. No feature changes.
 

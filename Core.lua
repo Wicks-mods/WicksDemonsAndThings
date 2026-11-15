@@ -39,21 +39,19 @@ local A = Core:NewAddon("WicksDemonsAndThings", {
     version = (C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata)(ADDON, "Version"),
 })
 
-WicksDemonsDB = WicksDemonsDB or {
-    version = 1,
-    soul   = { point = "CENTER", x = -180, y = 200, hidden = false, locked = false },
-    pet    = { point = "CENTER", x =  180, y = 200, hidden = false, locked = false },
-    cd     = { point = "CENTER", x =    0, y = 156, hidden = false, locked = false },
-    shard  = { point = "CENTER", x =    0, y = 240, hidden = false, locked = false },
-    minimap = { hide = false, angle = 200 },
-}
-WicksDemonsDB.soul    = WicksDemonsDB.soul    or { point = "CENTER", x = -180, y = 200, hidden = false, locked = false }
-WicksDemonsDB.pet     = WicksDemonsDB.pet     or { point = "CENTER", x =  180, y = 200, hidden = false, locked = false }
-WicksDemonsDB.cd      = WicksDemonsDB.cd      or { point = "CENTER", x =    0, y = 156, hidden = false, locked = false }
-WicksDemonsDB.shard   = WicksDemonsDB.shard   or { point = "CENTER", x =    0, y = 240, hidden = false, locked = false }
-WicksDemonsDB.minimap = WicksDemonsDB.minimap or { hide = false, angle = 200 }
-
-WicksDemonsCharDB = WicksDemonsCharDB or { version = 1 }
+-- Runs here so the modules below have tables to read, and again at
+-- PLAYER_LOGIN: the client swaps in the saved table after these files run,
+-- and a table saved by an older version can lack a section.
+local function backfill()
+    WicksDemonsDB = WicksDemonsDB or { version = 1 }
+    WicksDemonsDB.soul    = WicksDemonsDB.soul    or { point = "CENTER", x = -180, y = 200, hidden = false, locked = false }
+    WicksDemonsDB.pet     = WicksDemonsDB.pet     or { point = "CENTER", x =  180, y = 200, hidden = false, locked = false }
+    WicksDemonsDB.cd      = WicksDemonsDB.cd      or { point = "CENTER", x =    0, y = 156, hidden = false, locked = false }
+    WicksDemonsDB.shard   = WicksDemonsDB.shard   or { point = "CENTER", x =    0, y = 240, hidden = false, locked = false }
+    WicksDemonsDB.minimap = WicksDemonsDB.minimap or { hide = false, angle = 200 }
+    WicksDemonsCharDB = WicksDemonsCharDB or { version = 1 }
+end
+backfill()
 
 WicksDemons = WicksDemons or {}
 local WD = WicksDemons
@@ -164,6 +162,7 @@ end
 
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
+        backfill()
         if not WD.isWarlock then
             A:Print("loaded (non-warlock: viewer mode).")
         else
