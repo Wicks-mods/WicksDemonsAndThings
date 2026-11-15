@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.2 (2026-11-15)
 
 - Fixed: settings saved by an older version could lack a section and raise an error at login. Missing sections are filled in.
 - Shows in the game's addon list with an icon and the two-tone Wick title, under a Wick's Mods heading.
