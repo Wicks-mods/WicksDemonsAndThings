@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- CurseForge now installs WickCore along with this addon. No file said it
+  was needed, so the app installed the addon alone and it could not run.
+- The message shown when WickCore is missing says where to get it.
+
 ## 0.2.2 (2026-11-15)
 
 - Fixed: settings saved by an older version could lack a section and raise an error at login. Missing sections are filled in.
